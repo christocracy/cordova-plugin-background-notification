@@ -10,7 +10,7 @@ Follows the [Cordova Plugin spec](https://github.com/apache/cordova-plugman/blob
 This plugin leverages Cordova/PhoneGap's [require/define functionality used for plugins](http://simonmacdonald.blogspot.ca/2012/08/so-you-wanna-write-phonegap-200-android.html). 
 
 ## Using the plugin ##
-The plugin creates the object `window.plugins.backgroundFetch` with the methods `configure(success, fail, option)`, `start(success, fail)` and `stop(success, fail). 
+The plugin creates the object `window.plugins.backgroundFetch` with the methods `configure(success, fail, option)`. 
 
 ## Installing the plugin ##
 
@@ -19,7 +19,7 @@ The plugin creates the object `window.plugins.backgroundFetch` with the methods 
 2.Add the plugin to your project (from the root of your project):
 
 ```
-   phonegap plugin add https://github.com/christocracy/cordova-plugin-background-fetch.git
+   phonegap plugin add https://github.com/christocracy/cordova-plugin-background-notification.git
 ```
 
 3.**Black-magic**:  since PhoneGap has no power to modify AppDelegate.m, we have to patch it with a hook-script.  Copy the following script into your project's `./cordova/hooks` folder:

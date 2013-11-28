@@ -45,7 +45,10 @@
 -(void) finish:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"- CDVBackgroundNotification finish");
-    _completionHandler(UIBackgroundFetchResultNewData);    
+    if (_completionHandler) {
+        _completionHandler(UIBackgroundFetchResultNewData);
+        _completionHandler = nil;
+    }
 }
 
 // If you don't stopMonitorying when application terminates, the app will be awoken still when a

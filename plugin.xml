@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+           id="org.transistorsoft.cordova.background-notification"
+      version="0.1.0">
+    <name>CDVBackgroundNotification</name>
+    <description>Cordova Background Notification Plugin</description>
+    <license>MIT</license>
+    <keywords>phonegap,background fetch</keywords>
+
+    <engines>
+        <engine name="cordova" version=">=3.0.0" />
+    </engines>
+
+    <js-module src="www/BackgroundNotification.js" name="BackgroundNotification">
+        <clobbers target="plugins.backgroundNotification" />
+    </js-module>
+
+    <!-- android -->
+    <platform name="android">
+        
+     </platform>          
+     
+     <platform name="ios">
+
+        <!-- required background modes:  App registers for location updates -->
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+            <array>
+                <string>remote-notification</string>
+            </array>
+        </config-file>
+
+        <config-file target="config.xml" parent="/*">
+            <feature name="BackgroundNotification">
+                <param name="ios-package" value="CDVBackgroundNotification"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/ios/CDVBackgroundNotification.m" />
+        <source-file src="src/ios/CDVBackgroundNotification.h" />
+     </platform>          
+
+</plugin>

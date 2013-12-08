@@ -11,6 +11,7 @@
 {
     void (^_completionHandler)(UIBackgroundFetchResult);
     NSString *_callbackId;
+    NSTimer *backgroundTimer;
 }
 
 - (CDVPlugin*) initWithWebView:(UIWebView*) theWebView
@@ -25,14 +26,15 @@
 
 - (void) configure:(CDVInvokedUrlCommand*)command
 {    
-    NSLog(@"CDVBackgroundNotification configure");    
+    NSLog(@"- CDVBackgroundNotification configure");    
     _callbackId = command.callbackId;
 }
 
 -(void) onNotification:(NSNotification *) notification
 {
+    UIApplication *app = [UIApplication sharedApplication];
     // We only run in the background.  Foreground notifications should already be handled.
-    UIApplicationState state = [[UIApplication sharedApplication] applicationState];
+    UIApplicationState state = [app applicationState];
     if (state != UIApplicationStateBackground) {
         return;
     }
@@ -44,18 +46,39 @@
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: notification.object[@"userInfo"]];
     [result setKeepCallbackAsBool:YES];
     
+    // Set a timer to ensure our bgTask is murdered 1s before our remaining time expires.
+    backgroundTimer = [NSTimer scheduledTimerWithTimeInterval:app.backgroundTimeRemaining-1
+        target:self
+        selector:@selector(onTimeExpired:)
+        userInfo:nil
+        repeats:NO];
+    
     // Inform javascript a background-fetch event has occurred.
     [self.commandDelegate sendPluginResult:result callbackId:_callbackId];
 }
 -(void) finish:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"- CDVBackgroundNotification finish");
+    [self stopBackgroundTask];
+}
+- (void)onTimeExpired:(NSTimer *)timer
+{
+    NSLog(@"- CDVBackgroundNotification TIME EXPIRED");
+    [self stopBackgroundTask];
+}
+-(void)stopBackgroundTask
+{
+    UIApplication *app = [UIApplication sharedApplication];
+    
+    [backgroundTimer invalidate];
+    backgroundTimer = nil;
+
     if (_completionHandler) {
+        NSLog(@"- CDVBackgroundNotification stopBackgroundTask (remaining t: %f)", app.backgroundTimeRemaining);
         _completionHandler(UIBackgroundFetchResultNewData);
         _completionHandler = nil;
     }
 }
-
 // If you don't stopMonitorying when application terminates, the app will be awoken still when a
 // new location arrives, essentially monitoring the user's location even when they've killed the app.
 // Might be desirable in certain apps.

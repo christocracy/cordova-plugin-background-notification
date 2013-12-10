@@ -39,22 +39,25 @@
         return;
     }
     NSLog(@"- CDVBackgroundNotification onNotification");
-    _completionHandler = notification.object[@"handler"];
-    
-    CDVPluginResult* result = nil;
-    
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: notification.object[@"userInfo"]];
-    [result setKeepCallbackAsBool:YES];
+    _completionHandler = [notification.object[@"handler"] copy];
     
     // Set a timer to ensure our bgTask is murdered 1s before our remaining time expires.
     backgroundTimer = [NSTimer scheduledTimerWithTimeInterval:app.backgroundTimeRemaining-1
-        target:self
-        selector:@selector(onTimeExpired:)
-        userInfo:nil
-        repeats:NO];
+                                                       target:self
+                                                     selector:@selector(onTimeExpired:)
+                                                     userInfo:nil
+                                                      repeats:NO];
     
-    // Inform javascript a background-fetch event has occurred.
-    [self.commandDelegate sendPluginResult:result callbackId:_callbackId];
+    [self.commandDelegate runInBackground:^{
+        CDVPluginResult* result = nil;
+        
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: notification.object[@"userInfo"]];
+        [result setKeepCallbackAsBool:YES];
+        
+        // Inform javascript a background-fetch event has occurred.
+        [self.commandDelegate sendPluginResult:result callbackId:_callbackId];
+    }];
+    
 }
 -(void) finish:(CDVInvokedUrlCommand*)command
 {

@@ -11,7 +11,6 @@
 {
     void (^_completionHandler)(UIBackgroundFetchResult);
     NSString *_callbackId;
-    NSTimer *backgroundTimer;
 }
 
 - (CDVPlugin*) initWithWebView:(UIWebView*) theWebView
@@ -41,13 +40,6 @@
     NSLog(@"- CDVBackgroundNotification onNotification");
     _completionHandler = [notification.object[@"handler"] copy];
     
-    // Set a timer to ensure our bgTask is murdered 1s before our remaining time expires.
-    backgroundTimer = [NSTimer scheduledTimerWithTimeInterval:app.backgroundTimeRemaining-1
-                                                       target:self
-                                                     selector:@selector(onTimeExpired:)
-                                                     userInfo:nil
-                                                      repeats:NO];
-    
     [self.commandDelegate runInBackground:^{
         CDVPluginResult* result = nil;
         
@@ -64,18 +56,11 @@
     NSLog(@"- CDVBackgroundNotification finish");
     [self stopBackgroundTask];
 }
-- (void)onTimeExpired:(NSTimer *)timer
-{
-    NSLog(@"- CDVBackgroundNotification TIME EXPIRED");
-    [self stopBackgroundTask];
-}
+
 -(void)stopBackgroundTask
 {
     UIApplication *app = [UIApplication sharedApplication];
     
-    [backgroundTimer invalidate];
-    backgroundTimer = nil;
-
     if (_completionHandler) {
         NSLog(@"- CDVBackgroundNotification stopBackgroundTask (remaining t: %f)", app.backgroundTimeRemaining);
         _completionHandler(UIBackgroundFetchResultNewData);

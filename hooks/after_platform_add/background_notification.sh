@@ -7,10 +7,15 @@ if pushd platforms/ios 2>/dev/null ; then   # iOS-specific actions...
     # Patch *-Info.plist
         PROJNAME=$(echo *.xcodeproj|sed -e 's/\..*//')
     sed -i '' 's/@end/\
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void(^)(UIBackgroundFetchResult result))handler\
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void(^)(UIBackgroundFetchResult result))completionHandler\
 {\
+    void (^safeHandler)(UIBackgroundFetchResult) = ^(UIBackgroundFetchResult result){\
+        dispatch_async(dispatch_get_main_queue(), ^{\
+            completionHandler(result);\
+        });\
+    };\    
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithCapacity:2];\
-    [params setObject:handler forKey:@"handler"];\
+    [params setObject:safeHandler forKey:@"handler"];\
     [params setObject:userInfo forKey:@"userInfo"];\
     [[NSNotificationCenter defaultCenter] postNotificationName:@"BackgroundNotification" object:params];\
 }\

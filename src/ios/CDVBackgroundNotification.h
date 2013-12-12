@@ -1,5 +1,5 @@
 //
-//  CDVBackgroundGeoLocation.hs
+//  CDVBackgroundNotification.h
 //
 //  Created by Chris Scott <chris@transistorsoft.com>
 //
@@ -10,6 +10,5 @@
 @interface CDVBackgroundNotification : CDVPlugin <UIApplicationDelegate>
 - (void) configure:(CDVInvokedUrlCommand*)command;
 - (void) finish:(CDVInvokedUrlCommand*)command;
-
 @end
 

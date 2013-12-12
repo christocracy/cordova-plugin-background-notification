@@ -13,7 +13,7 @@ if pushd platforms/ios 2>/dev/null ; then   # iOS-specific actions...
         dispatch_async(dispatch_get_main_queue(), ^{\
             completionHandler(result);\
         });\
-    };\    
+    };\
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithCapacity:2];\
     [params setObject:safeHandler forKey:@"handler"];\
     [params setObject:userInfo forKey:@"userInfo"];\

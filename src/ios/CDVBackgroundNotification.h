@@ -10,5 +10,6 @@
 @interface CDVBackgroundNotification : CDVPlugin <UIApplicationDelegate>
 - (void) configure:(CDVInvokedUrlCommand*)command;
 - (void) finish:(CDVInvokedUrlCommand*)command;
+- (void) onNotification:(NSNotification *) notification;
 @end
 

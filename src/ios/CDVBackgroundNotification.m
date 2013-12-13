@@ -11,22 +11,29 @@
 {
     void (^_completionHandler)(UIBackgroundFetchResult);
     NSString *_callbackId;
+    NSNotification *_notification;
 }
 
-- (CDVPlugin*) initWithWebView:(UIWebView*) theWebView
+- (void)pluginInitialize
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
         selector:@selector(onNotification:)
         name:@"BackgroundNotification"
         object:nil];
-    
-    return self;
 }
 
 - (void) configure:(CDVInvokedUrlCommand*)command
 {    
-    NSLog(@"- CDVBackgroundNotification configure");    
+    NSLog(@"- CDVBackgroundNotification configure");
+    UIApplication *app = [UIApplication sharedApplication];
+    UIApplicationState state = [app applicationState];
+    
     _callbackId = command.callbackId;
+    
+    // Handle case where app was launched due to notification event
+    if (state == UIApplicationStateBackground && _completionHandler && _notification) {
+        [self onNotification:_notification];
+    }
 }
 
 -(void) onNotification:(NSNotification *) notification
@@ -37,7 +44,9 @@
     if (state != UIApplicationStateBackground) {
         return;
     }
+    
     NSLog(@"- CDVBackgroundNotification onNotification");
+    _notification = notification;
     _completionHandler = [notification.object[@"handler"] copy];
     
     [self.commandDelegate runInBackground:^{

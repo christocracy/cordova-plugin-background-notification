@@ -12,10 +12,6 @@
         <engine name="cordova" version=">=3.0.0" />
     </engines>
 
-    <js-module src="www/BackgroundNotification.js" name="BackgroundNotification">
-        <clobbers target="plugins.backgroundNotification" />
-    </js-module>
-
     <!-- android -->
     <platform name="android">
         
@@ -39,6 +35,11 @@
 
         <source-file src="src/ios/CDVBackgroundNotification.m" />
         <source-file src="src/ios/CDVBackgroundNotification.h" />
+        
+        <js-module src="www/BackgroundNotification.js" name="BackgroundNotification">
+            <clobbers target="plugins.backgroundNotification" />
+        </js-module>
+
      </platform>          
 
 </plugin>

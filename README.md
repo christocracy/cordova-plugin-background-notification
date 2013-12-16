@@ -29,35 +29,50 @@ The plugin creates the object `window.plugins.backgroundFetch` with the methods 
     $ chmod +x .cordova/hooks/after_platform_add/background_notification.sh
 ```
 
-An alternative to the hook-script above is to simply copy/paste the following method into your `AppDelegate.m` file:
+An alternative to the hook-script above (and if you keep your /platforms in the repo--I don't) is to simply copy/paste the following method into your `AppDelegate.m` file:
 
 ```
-    - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void(^)(UIBackgroundFetchResult result))handler
+    - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void(^)(UIBackgroundFetchResult result))completionHandler
     {
+        void (^safeHandler)(UIBackgroundFetchResult) = ^(UIBackgroundFetchResult result){
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completionHandler(result);
+            });
+        };
         NSMutableDictionary* params = [NSMutableDictionary dictionaryWithCapacity:2];
-        [params setObject:handler forKey:@"handler"];
+        [params setObject:safeHandler forKey:@"handler"];
         [params setObject:userInfo forKey:@"userInfo"];
+
+        // Post a custom "BackgroundNotification" event, subscribed-to in CDVBackgroundNotification
         [[NSNotificationCenter defaultCenter] postNotificationName:@"BackgroundNotification" object:params];
     }
+
 ```
+
+I've found it's way to painful to manage the /platforms in version-control due to all the stupid conflicts in the .xcodeproj and whatnot.  That's why I like to implement the hook-script, so it adds the required methods to AppDelegate.m each time I rebuild.
 
 ## Example ##
 
 A full example could be:
 ```
    onDeviceReady: function() {
-        var Notifier = window.plugins.backgroundNotification;
+        var BGN = window.plugins.backgroundNotification;
         
         // Your background-fetch handler.
         var notificationCallback = function(notification) {
             console.log('BackgroundNotification received');
 
-            // perform your ajax request to server here
-            setTimeout(function() {
-                Notifier.finish();   // <-- N.B. You MUST called #finish so that native-side can invoke the required completion-handler
-            }, 1000);
+            // HTTP to the server.
+            $.get({
+                url: '/heartbeat.json',
+                callback: function(response) {
+                    // Inform native plugin that we're finished here and the bg-thread can be finished.
+                    // Don't forget or OS will probably kill your app for bad behaviour.
+                    BGN.finish();
+                }
+            });
         }
-        Notifier.configure(notifictionCallback);
+        BGN.configure(notificationCallback);
     }
 
 

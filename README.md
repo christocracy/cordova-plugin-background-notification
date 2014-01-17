@@ -22,35 +22,6 @@ The plugin creates the object `window.plugins.backgroundFetch` with the methods 
    phonegap plugin add https://github.com/christocracy/cordova-plugin-background-notification.git
 ```
 
-3.**Black-magic**:  since PhoneGap has no power to modify AppDelegate.m, we have to patch it with a hook-script.  Copy the following script into your project's `./cordova/hooks` folder:
-
-```
-    $ cp plugins/org.transistorsoft.cordova.background-notification/hooks/after_platform_add/background_notification.sh .cordova/hooks/after_platform_add/
-    $ chmod +x .cordova/hooks/after_platform_add/background_notification.sh
-```
-
-An alternative to the hook-script above (and if you keep your /platforms in the repo--I don't) is to simply copy/paste the following method into your `AppDelegate.m` file:
-
-```
-    - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void(^)(UIBackgroundFetchResult result))completionHandler
-    {
-        void (^safeHandler)(UIBackgroundFetchResult) = ^(UIBackgroundFetchResult result){
-            dispatch_async(dispatch_get_main_queue(), ^{
-                completionHandler(result);
-            });
-        };
-        NSMutableDictionary* params = [NSMutableDictionary dictionaryWithCapacity:2];
-        [params setObject:safeHandler forKey:@"handler"];
-        [params setObject:userInfo forKey:@"userInfo"];
-
-        // Post a custom "BackgroundNotification" event, subscribed-to in CDVBackgroundNotification
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"BackgroundNotification" object:params];
-    }
-
-```
-
-I've found it's way to painful to manage the /platforms in version-control due to all the stupid conflicts in the .xcodeproj and whatnot.  That's why I like to implement the hook-script, so it adds the required methods to AppDelegate.m each time I rebuild.
-
 ## Example ##
 
 A full example could be:

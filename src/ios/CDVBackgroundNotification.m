@@ -6,6 +6,24 @@
 //
 #import "CDVBackgroundNotification.h"
 #import <Cordova/CDVJSON.h>
+#import "AppDelegate.h"
+
+@implementation AppDelegate(AppDelegate)
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void(^)(UIBackgroundFetchResult result))completionHandler
+{
+    void (^safeHandler)(UIBackgroundFetchResult) = ^(UIBackgroundFetchResult result){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completionHandler(result);
+        });
+    };
+    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithCapacity:2];
+    [params setObject:safeHandler forKey:@"handler"];
+    [params setObject:userInfo forKey:@"userInfo"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"BackgroundNotification" object:params];
+}
+
+@end
 
 @implementation CDVBackgroundNotification
 {

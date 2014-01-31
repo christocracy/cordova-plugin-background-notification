@@ -34,7 +34,7 @@
         </config-file>
 
         <source-file src="src/ios/CDVBackgroundNotification.m" />
-        <source-file src="src/ios/CDVBackgroundNotification.h" />
+        <header-file src="src/ios/CDVBackgroundNotification.h" />
         
         <js-module src="www/BackgroundNotification.js" name="BackgroundNotification">
             <clobbers target="plugins.backgroundNotification" />

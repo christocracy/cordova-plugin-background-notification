@@ -5,7 +5,6 @@
 //  Largely based upon http://www.mindsizzlers.com/2011/07/ios-background-location/
 //
 #import "CDVBackgroundNotification.h"
-#import <Cordova/CDVJSON.h>
 #import "AppDelegate.h"
 
 @implementation AppDelegate(AppDelegate)
